@@ -1,0 +1,102 @@
+---
+title: "CodeBook_plots"
+author: "Mike Lakoju"
+date: "18 April 2016"
+output: html_document
+---
+
+This assignment uses data from the UC Irvine Machine Learning Repository, a popular repository for machine learning datasets. In particular, we will be using the “Individual household electric power consumption Data Set” which I have made available on the course web site:
+
+Dataset: Electric power consumption [20Mb]
+Description: Measurements of electric power consumption in one household with a one-minute sampling rate over a period of almost 4 years. Different electrical quantities and some sub-metering values are available.
+The following descriptions of the 9 variables in the dataset are taken from the UCI web site:
+
+Date: Date in format dd/mm/yyyy
+Time: time in format hh:mm:ss
+Global_active_power: household global minute-averaged active power (in kilowatt)
+Global_reactive_power: household global minute-averaged reactive power (in kilowatt)
+Voltage: minute-averaged voltage (in volt)
+Global_intensity: household global minute-averaged current intensity (in ampere)
+Sub_metering_1: energy sub-metering No. 1 (in watt-hour of active energy). It corresponds to the kitchen, containing mainly a dishwasher, an oven and a microwave (hot plates are not electric but gas powered).
+Sub_metering_2: energy sub-metering No. 2 (in watt-hour of active energy). It corresponds to the laundry room, containing a washing-machine, a tumble-drier, a refrigerator and a light.
+Sub_metering_3: energy sub-metering No. 3 (in watt-hour of active energy). It corresponds to an electric water-heater and an air-conditioner.
+
+## After downloading the data file, Read the dataset into R:
+
+```{r}
+data<-read.table("household_power_consumption.txt",header = TRUE, sep= ";")
+```
+
+###Look at the attributes of the datset:
+
+```{r}
+names(data)
+lapply(data, class)
+       
+```
+
+## Let's use strptime to change the factor Date and Time values in to yyyy-mm-dd hh:mm:ss. First, let's create a variables by concatenating Date and Time.
+```{r}
+data$DateTime<-paste(data$Date, data$Time)
+
+```
+## Next chnage DateTime to yyyy-mm-dd hh:mm:ss
+```{r}
+data$DateTime<-strptime(data$DateTime, "%d/%m/%Y %H:%M:%S")
+```
+## Let's work with the data for dates 2007-02-01 and 2007-02-02.
+```{r}
+start<-which(data$DateTime==strptime("2007-02-01", "%Y-%m-%d"))
+
+end<-which(data$DateTime==strptime("2007-02-02 23:59:00", "%Y-%m-%d %H:%M:%S"))
+
+data2<-data[start:end,]
+
+```
+
+#Plot1 .
+```{r}
+hist(as.numeric(as.character(data2$Global_active_power)), # note we used as.character and as numeric since
+     # the variable is factor variable.
+     main="Global Active Power",
+     xlab="Global Active Power (kilowatts)", col="red")
+```
+
+#Plot 2
+```{r}
+plot(data2$DateTime, as.numeric(as.character(data2$Global_active_power)),
+     type='l',ylab="Global Active Power (Kilowatts)", xlab="")
+
+```
+
+#Plot 3
+```{r}
+plot(data2$DateTime, as.numeric(as.character(data2$Sub_metering_1)),type='l', 
+     ylab ="Energy sub metering", xlab="")
+ lines(data2$DateTime, as.numeric(as.character(data2$Sub_metering_2)),type='l', col='red')
+ lines(data2$DateTime, data2$Sub_metering_3,type='l', col="blue")
+  legend('topright', c("Sub_metering_1","Sub_metering_2","Sub_metering_3"),
+                    lty=c(1,1,1)
+                    ,col=c("black","red","blue"))
+
+```
+
+#Plot 4
+```{r}
+par(mfcol=c(2,2))
+
+plot(data2$DateTime, as.numeric(as.character(data2$Global_active_power)),type='l',ylab="Global Active Power", xlab="")
+
+plot(data2$DateTime, as.numeric(as.character(data2$Sub_metering_1)),type='l', xlab="",ylab ="Energy sub metering")
+lines(data2$DateTime, as.numeric(as.character(data2$Sub_metering_2)),type='l', col='red')
+lines(data2$DateTime, data2$Sub_metering_3,type='l', col="blue")
+legend('topright', c("Sub_metering_1","Sub_metering_2","Sub_metering_3"),
+       lty=c(1,1,1),col=c("black","red","blue"))
+
+plot(data2$DateTime, as.numeric(as.character(data2$Voltage)),type='l', 
+     ylab="Voltage",xlab="datetime" )
+
+plot(data2$DateTime, as.numeric(as.character(data2$Global_reactive_power)),type='l', 
+     ylab="Global_reactive_power",xlab="datetime" )
+```
+
